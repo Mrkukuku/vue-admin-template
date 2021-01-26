@@ -16,9 +16,18 @@ export function getInfo() {
   })
 }
 
-export function logout() {
+export function fetchList(data) {
   return request({
-    url: '/vue-admin-template/user/logout',
-    method: 'post'
+    url: '/api/admin/user/list',
+    method: 'post',
+    data
   })
 }
+export function fetchPart(data) {
+  return request({
+    url: '/api/admin/dept/list',
+    method: 'post',
+    data
+  })
+}
+

@@ -72,7 +72,6 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error) // for debug
-    console.log(error.response)
     switch (error.response.status) {
       case 600:
         MessageBox.confirm('用户登录过期，请重新登陆', {

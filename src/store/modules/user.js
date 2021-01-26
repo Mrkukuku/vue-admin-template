@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
@@ -7,7 +7,8 @@ const getDefaultState = () => {
     token: getToken(),
     name: '',
     avatar: '',
-    roles: []
+    roles: [],
+    userInfo:{}
   }
 }
 
@@ -28,7 +29,10 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
-  }
+  },
+  SET_Info: (state, info) => {
+    state.userInfo = info
+  },
 }
 
 const actions = {
@@ -54,7 +58,7 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-        data.roles = ['admin']
+        data.roles = ['admin',]
         // const { roles, name, avatar, introduction } = data
         const { username, avatar,roles } = data
 
@@ -62,10 +66,10 @@ const actions = {
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
-
         commit('SET_ROLES', roles)
         commit('SET_NAME', username)
-        commit('SET_AVATAR', avatar)
+        // commit('SET_AVATAR', avatar)
+        commit('SET_Info', data)
         // commit('SET_INTRODUCTION', introduction)
         resolve(data)
       }).catch(error => {

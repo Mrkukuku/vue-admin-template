@@ -22,7 +22,11 @@ export default {
 <style lang="scss" scoped>
 .dashboard {
   &-container {
-    margin: 30px;
+    padding: 30px;
+    background-color: #f0f2f5;
+    // box-sizing: border-box;
+    height: 100%;
+    width: 100%;
   }
   &-text {
     font-size: 30px;

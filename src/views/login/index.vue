@@ -35,6 +35,7 @@
           tabindex="2"
           auto-complete="on"
           @keyup.enter.native="handleLogin"
+          class="password"
         />
         <span class="show-pwd" @click="showPwd">
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
@@ -48,8 +49,6 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
-
 export default {
   name: 'Login',
   data() {
@@ -57,7 +56,7 @@ export default {
       if (value) {
          callback()
       } else {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入用户名'))
       }
     }
     const validatePassword = (rule, value, callback) => {
@@ -69,8 +68,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'cccc',
-        password: '000000'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
