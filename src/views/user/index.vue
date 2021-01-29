@@ -6,7 +6,7 @@
         <el-option v-for="item in calendarTypeOptions" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
       <el-select v-model="listQuery.position" placeholder="职位" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in positionList" :key="item.key" :label="item.name" :value="item.key" />
+        <el-option v-for="item in positionList" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
       <el-button v-waves class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
@@ -27,9 +27,20 @@
       highlight-current-row
       style="width: 100%;"
     >
+     <el-table-column
+      label="序号"
+      align="center"
+      type="index"
+      width="50">
+    </el-table-column>
       <el-table-column label="账号" prop="account"  align="center" width="160">
       </el-table-column>
       <el-table-column label="姓名" prop="username"  align="center" width="160">
+      </el-table-column>
+      <el-table-column label="部门"  align="center" width="160">
+        <template slot-scope="{row}">
+          <span>{{ row.departmentId&&calendarTypeOptions[row.departmentId-1].name||'' }}</span>
+        </template>
       </el-table-column>
       <el-table-column label="职位" prop="position"  align="center" width="160">
         <template slot-scope="{row}">
@@ -45,11 +56,17 @@
           <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button type="warning" icon="el-icon-star-off"  size="mini" @click="handleFreeze(row)">
+          <el-button type="success" icon="el-icon-star-off" v-if="row.isFrozen" size="mini" @click="handlethaw(row)" :disabled="row.position==1">
+           解冻
+          </el-button>
+          <el-button type="warning" icon="el-icon-star-off"  v-else size="mini" @click="handleFreeze(row.id)" :disabled="row.position==1">
             冻结
           </el-button>
-          <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDel(row)">
-          删除
+          <el-button type="warning" icon="el-icon-star-off"  size="mini" @click="handleReset(row.id)" :disabled="row.position==1&&!checkPermission(['admin'])">
+            重置密码
+          </el-button>
+          <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDel(row.id)" :disabled="row.position==1">
+           删除
           </el-button>
         </template>
       </el-table-column>
@@ -59,8 +76,7 @@
 
     
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
          <el-form-item label="部门" prop="departmentId" v-if="temp.position!=1">
           <el-select v-model="temp.departmentId" class="filter-item" placeholder="请选择">
             <el-option v-for="item in calendarTypeOptions" :key="item.id" :label="item.name" :value="item.id" />
@@ -74,13 +90,13 @@
          <el-form-item label="账号" prop="account">
           <el-input v-model="temp.account" />
         </el-form-item>
-         <el-form-item  label="密码" prop="password">
+         <el-form-item  label="密码" prop="password" v-if="dialogStatus=='create'">
           <el-input
             :key="passwordType"
             ref="password"
             v-model="temp.password"
             :type="passwordType"
-            placeholder=""
+            placeholder="6位至16位"
             name="password"
             tabindex="2"
             auto-complete="on"
@@ -99,9 +115,22 @@
          <el-form-item label="邮箱" prop="email">
           <el-input v-model="temp.email" />
         </el-form-item>
-         <el-form-item label="描述" prop="description">
+        <el-form-item label="描述" prop="description">
           <el-input v-model="temp.description" type="textarea" />
         </el-form-item>
+         <el-form-item label="头像">
+           <el-upload
+            class="avatar-uploader"
+            action=""
+            :show-file-list="false"
+             :http-request="handleSuccess"
+            
+            >
+            <img v-if="temp.avatar" :src="temp.avatar" class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
+        </el-form-item>
+       
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -113,41 +142,40 @@
       </div>
     </el-dialog>
      <!-- 冻结弹框 -->
-            <el-dialog
-                title="冻结账号"
-                :visible.sync="FrozenVisible"
-                width="30%"
-                :close-on-click-modal="false"
-                :before-close="closeFrozen">
-                    <el-form :rules="rulesFrozen" :model="FrozenForm" :data="FrozenForm" status-icon  ref="FrozenForm" label-width="130px" class="demo-ruleForm FrozenForm">
-                        <el-form-item label="冻结时间" prop="time">
-                            <el-date-picker
-                                v-model="FrozenForm.time"
-                                type="datetimerange"
-                                start-placeholder="开始时间"
-                                end-placeholder="结束时间"
-                                :picker-options="expireTimeOption"
-                                >
-                            </el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="封号原因" prop="frozenDesc">
-                            <el-input type="textarea" v-model="FrozenForm.frozenDesc"></el-input>
-                        </el-form-item>
-                        <el-form-item class="formfooter">
-                            <el-button type="primary" @click="FrozenSubmit('FrozenForm')">冻结</el-button>
-                            <!-- <el-button @click="FrozenReset('FrozenForm')">重置</el-button> -->
-                            <el-button @click="closeFrozen">取 消</el-button>
-                        </el-form-item>
-                    </el-form>
-            </el-dialog>
+      <el-dialog
+          title="冻结账号"
+          :visible.sync="FrozenVisible"
+          width="30%"
+          :close-on-click-modal="false"
+          :before-close="closeFrozen">
+              <el-form :rules="rulesFrozen" :model="FrozenForm" :data="FrozenForm" status-icon  ref="FrozenForm" label-width="130px" class="demo-ruleForm FrozenForm">
+                  <el-form-item label="冻结时间" prop="time">
+                      <el-date-picker
+                          v-model="FrozenForm.time"
+                          type="datetimerange"
+                          start-placeholder="开始时间"
+                          end-placeholder="结束时间"
+                          :picker-options="expireTimeOption"
+                          >
+                      </el-date-picker>
+                  </el-form-item>
+                  <el-form-item label="封号原因" prop="frozenDesc">
+                      <el-input type="textarea" v-model="FrozenForm.frozenDesc"></el-input>
+                  </el-form-item>
+                  <el-form-item class="formfooter">
+                      <el-button type="primary" @click="FrozenSubmit('FrozenForm')">冻结</el-button>
+                      <el-button @click="closeFrozen">取 消</el-button>
+                  </el-form-item>
+              </el-form>
+      </el-dialog>
   </div>
 </template>
 
 <script>
-import { fetchList,fetchPart } from '@/api/user'
+import { fetchList,fetchPart,addUser,fetchDel,fetchFrozen,fetchUnFrozen,fetchReset} from '@/api/user'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-import { parseTime } from '@/utils'
+import { timeFormat } from '@/utils'
 import checkPermission from '@/utils/permission'
 
 export default {
@@ -167,49 +195,57 @@ export default {
             }else{
                 callback();
             }
-            
       }
+      var validatePass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'));
+        }else if(value.length<6||value.length>16){
+            callback(new Error('请输入6位至16位密码'));
+        }
+        else {
+          callback();
+        }
+      };
     return {
       tableKey: 0,
       list: [],//列表
       total: 0,
-      listLoading: false,//
+      listLoading: true,//
       dialogFormVisible:false,
       passwordType: 'password',
       listQuery: {//
         pageNum: 1,
-        pageSize: 20,
+        pageSize: 10,
         departmentId: undefined,
         username: undefined,
         position : undefined,
       },
-      importanceOptions: [],
+      importanceOptions:[],
       positionList:[
         {
           name:'主管',
-          key:2
+          id:2
         },
         {
           name:'普通员工',
-          key:3
+          id:3
         },
       ],
       calendarTypeOptions:[],
       temp: {
         departmentId:'',
-        position:2,
+        position:3,
         description: '',
         username: '',
-        type: '',
-        phone: '',
-        part:'',
+        phone:'',
         account:'',
         password:'',
-        email:''
+        email:'',
+        avatar:''
       },
       rules: {
         account: [{ required: true, message: '请输入', trigger: 'blur' }],
-        password: [{ required: true, message: '请输入', trigger: 'blur' }],
+        password: [{ required: true, trigger: 'blur',validator:validatePass}],
         username: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
         departmentId: [{ required: true, message: '请选择', trigger: 'blur' }],
         position: [{ required: true, message: '请选择', trigger: 'blur' }],
@@ -220,7 +256,9 @@ export default {
       FrozenForm:{    //冻结表单
           time:'',    //冻结时间
           frozenDesc:'',//冻结原因
-          unitId:null   //冻结id
+          uid:null,  //冻结id
+          frozenEndTime:'',
+          frozenStartTime:''
       },
       rulesFrozen:{   //表格验证字段
           time: [
@@ -231,8 +269,8 @@ export default {
           ],
       },
       expireTimeOption: {//时间范围
-          disabledDate(date) {
-              return date.getTime()+24*60*60*1000 < Date.now();
+          disabledDate(time) {
+              return time.getTime() <Date.now() - 8.64e7;
           }
         },
       textMap: {
@@ -247,6 +285,7 @@ export default {
     this.getPart()
   },
   methods: {
+    checkPermission,
      showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -261,6 +300,7 @@ export default {
       fetchList(this.listQuery).then(res=>{
         this.list = res.list
         this.total = res.total
+        this.listLoading =false
       })
     },
     getPart(){//获取部门
@@ -291,14 +331,45 @@ export default {
      createData() {//提交表单
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-         
+          addUser(this.temp,this.dialogStatus).then( res =>{
+             this.dialogFormVisible = false
+             this.getList()
+             let message = ''
+             if(this.dialogStatus=='create'){
+                message = '添加成功'
+               }else{
+                  message = '修改成功'
+               }
+               this.$message({
+                message,
+                type: 'success',
+                duration: 2 * 1000
+              })
+          })
         }
       })
     },
-    handleDel(){
-
+    handleDel(id){
       this.$confirm('你确定要删除吗').then(()=> {
-
+        fetchDel({id}).then( res=> {
+           this.getList()
+           this.$message({
+              message:'删除成功',
+              type: 'success',
+              duration: 2 * 1000
+            })
+        })
+      })
+    },
+    handleReset(uid){
+      this.$confirm('你确定要重置密码吗').then(()=> {
+        fetchReset({uid}).then( res=> {
+           this.$message({
+              message:'重置成功',
+              type: 'success',
+              duration: 2 * 1000
+            })
+        })
       })
     },
     handleRest(){
@@ -306,30 +377,57 @@ export default {
        this.getList()
     },
     resetTemp() {
-      this.temp = {
-        id: undefined,
-        remark: '',
-        title: '',
-        type: '',
-        email:''
-      }
+       Object.assign(this.$data.temp,this.$options.data().temp);
     },
-    handleFreeze(){
+    handleFreeze(id){
       this.FrozenVisible=true;
+      this.FrozenForm.uid = id
     },
      FrozenSubmit(name){ //封号冻结提交
         this.$refs[name].validate((valid)=>{
             if(valid){
-                
+                this.FrozenForm.frozenStartTime =  this.FrozenForm.time[0]
+                this.FrozenForm.frozenEndTime =  this.FrozenForm.time[1]
+                fetchFrozen(this.FrozenForm).then( res=>{
+                  this.getList()
+                   this.FrozenVisible=false;
+                  this.$message({
+                      message:'冻结成功',
+                      type: 'success',
+                      duration: 2 * 1000
+                    })
+                })
             }
         })
     },
-    closeFrozen(){  //关闭封号冻结框
+    closeFrozen(){//关闭封号冻结框
         this.FrozenVisible=false;
         this.FrozenReset();
     },
-    FrozenReset(){      //重置封号冻结原因    
+    FrozenReset(){//重置封号冻结原因    
       Object.assign(this.$data.FrozenForm,this.$options.data().FrozenForm);
+    },
+    handlethaw(row){
+      this.$confirm(`冻结时间为${timeFormat(row.frozenStartTime,'HH:mm:ss')}-${timeFormat(row.frozenEndTime,'HH:mm:ss')} 冻结理由为:${row.frozenDesc}`).then(()=> {
+        fetchUnFrozen({
+          frozenDesc :row.frozenDesc,
+          frozenEndTime : row.frozenEndTime,
+          frozenStartTime : row.frozenStartTime,
+          uid:row.id,
+        }).then( res=> {
+           this.getList()
+           this.$message({
+              message:'解冻成功',
+              type: 'success',
+              duration: 2 * 1000
+            })
+        })
+      })
+    },
+    handleSuccess (file) {
+        let formdata = new FormData(); 
+        formdata.append('file',file.file );
+        formdata.append('fileType',2);
     },
   }
 }
@@ -348,10 +446,23 @@ export default {
   .show-pwd {
     position: absolute;
     right: 10px;
-    top: 7px;
+    top: 4px;
     font-size: 16px;
     color: $dark_gray;
     cursor: pointer;
     user-select: none;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
   }
 </style>

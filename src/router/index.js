@@ -46,23 +46,20 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/home',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
-      component: () => import('@/views/dashboard/index'),
+      path: 'home',
+      name: 'Home',
+      component: () => import('@/views/home/index'),
       meta: { title: '首页', icon: 'el-icon-s-home' }
     }]
   },
-
- 
-
-  
 ]
 
 /**
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
+   1:"财务  2:"商务部"  3:"行政部"  4:"检测部"  5:"维保部"  6:"工程部"  7:"网络部"  8:"招投标部"
  */
 export const asyncRoutes = [
   {
@@ -76,90 +73,43 @@ export const asyncRoutes = [
         meta: { 
           title: '人员管理', 
           icon: 'user', 
-          roles: ['admin'] 
+          // roles: [3] 
          }
       }
     ]
   },
-  // {
-  //   path: '/example',
-  //   component: Layout,
-  //   redirect: '/example/table',
-  //   name: 'Example',
-  //   meta: { title: 'Example', icon: 'el-icon-s-help',roles: ['admin'] },
-  //   children: [
-  //     {
-  //       path: 'table',
-  //       name: 'Table',
-  //       component: () => import('@/views/table/index'),
-  //       meta: { title: 'Table', icon: 'table' }
-  //     },
-  //     {
-  //       path: 'tree',
-  //       name: 'Tree',
-  //       component: () => import('@/views/tree/index'),
-  //       meta: { title: 'Tree', icon: 'tree' }
-  //     }
-  //   ]
-  // },
-  // {
-  //   path: '/nested',
-  //   component: Layout,
-  //   redirect: '/nested/menu1',
-  //   name: 'Nested',
-  //   meta: {
-  //     title: 'Nested',
-  //     icon: 'nested',
-  //     roles: ['admin','editor'] 
-  //   },
-  //   children: [
-  //     {
-  //       path: 'menu1',
-  //       component: () => import('@/views/nested/menu1/index'), // Parent router-view
-  //       name: 'Menu1',
-  //       meta: { title: 'Menu1' , roles: ['editor'] },
-  //       children: [
-  //         {
-  //           path: 'menu1-1',
-  //           component: () => import('@/views/nested/menu1/menu1-1'),
-  //           name: 'Menu1-1',
-  //           meta: { title: 'Menu1-1',}
-  //         },
-  //         {
-  //           path: 'menu1-2',
-  //           component: () => import('@/views/nested/menu1/menu1-2'),
-  //           name: 'Menu1-2',
-  //           meta: { title: 'Menu1-2' },
-  //           children: [
-  //             {
-  //               path: 'menu1-2-1',
-  //               component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-  //               name: 'Menu1-2-1',
-  //               meta: { title: 'Menu1-2-1' }
-  //             },
-  //             {
-  //               path: 'menu1-2-2',
-  //               component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-  //               name: 'Menu1-2-2',
-  //               meta: { title: 'Menu1-2-2' }
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           path: 'menu1-3',
-  //           component: () => import('@/views/nested/menu1/menu1-3'),
-  //           name: 'Menu1-3',
-  //           meta: { title: 'Menu1-3' }
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       path: 'menu2',
-  //       component: () => import('@/views/nested/menu2/index'),
-  //       meta: { title: 'menu2' ,roles: ['editor'] }
-  //     }
-  //   ]
-  // },
+  {
+    path: '/unit',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Unit',
+        component: () => import('@/views/unit/index'),
+        meta: { 
+          title: '单位管理', 
+          icon: 'unit', 
+          // roles: ['admin'] 
+         }
+      }
+    ]
+  },
+  {
+    path: '/contract',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Contract',
+        component: () => import('@/views/contract/index'),
+        meta: { 
+          title: '合同管理', 
+          icon: 'contract', 
+          // roles: ['admin'] 
+         }
+      }
+    ]
+  },
 
   // {
   //   path: 'external-link',

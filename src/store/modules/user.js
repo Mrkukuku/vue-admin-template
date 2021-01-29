@@ -58,9 +58,11 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-        data.roles = ['admin',]
-        // const { roles, name, avatar, introduction } = data
-        const { username, avatar,roles } = data
+         data.roles = ['admin']
+        if(data.departmentId){
+          data.roles = [data.departmentId]
+        }
+        const { username, avatar,roles} = data
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -68,7 +70,7 @@ const actions = {
         }
         commit('SET_ROLES', roles)
         commit('SET_NAME', username)
-        // commit('SET_AVATAR', avatar)
+        commit('SET_AVATAR', avatar)
         commit('SET_Info', data)
         // commit('SET_INTRODUCTION', introduction)
         resolve(data)

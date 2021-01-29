@@ -10,26 +10,25 @@
       </template>
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+         <span style="margin-right:10px">{{name}}</span> 
+          <img :src="avatar&&avatar||img" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
-          <router-link to="/">
+          <!-- <router-link to="/">
             <el-dropdown-item>
               首页
             </el-dropdown-item>
-          </router-link>
-          <!-- <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a> -->
-          <el-dropdown-item divided @click.native="logout">
+          </router-link> -->
+          <el-dropdown-item @click.native="updatePsw">
+            <span style="display:block;">修改密码</span>
+          </el-dropdown-item>
+           <el-dropdown-item divided @click.native="logout">
             <span style="display:block;">退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
+      <password ref="Password"/>
     </div>
   </div>
 </template>
@@ -39,23 +38,28 @@ import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import Search from '@/components/HeaderSearch'
+import Password from './Navbar/Password'
 // import avatar from '@/assets/2.png'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger,
-    Search
+    Search,
+    Password
   },
   computed: {
     ...mapGetters([
       'sidebar',
       'device',
       'avatar',
+      'name'
     ])
   },
   data() {
     return {
+      img:'https://oss-kaleidoscope.oss-cn-hangzhou.aliyuncs.com/user/1611727678002-微信图片_20200914164016.png',
+      isOpen:false
     }
   },
   methods: {
@@ -65,6 +69,9 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    updatePsw(){
+      this.$refs.Password.open()
     }
   }
 }
@@ -129,11 +136,10 @@ export default {
 
     .avatar-container {
       margin-right: 30px;
-
       .avatar-wrapper {
-        margin-top: 5px;
         position: relative;
-
+        display: flex;
+        align-items: center;
         .user-avatar {
           cursor: pointer;
           width: 40px;

@@ -1,3 +1,4 @@
+import moment from 'moment'
 /**
  * Created by PanJiaChen on 16/11/18.
  */
@@ -114,4 +115,19 @@ export function param2Obj(url) {
     }
   })
   return obj
+}
+
+export function timeFormat (value) {
+    let reslut = ""
+    if( value ){
+        reslut = moment(value).format("YYYY-MM-DD HH:mm:ss")
+    }
+    return reslut
+}
+export function timeDate (value) {
+    let reslut = ""
+    if( value ){
+        reslut = moment(value).format("YYYY-MM-DD")
+    }
+    return reslut
 }

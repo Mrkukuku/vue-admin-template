@@ -14,6 +14,7 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+import * as filters from './filters' // global filters
 
 /**
  * If you don't want to use mock-server
@@ -32,7 +33,9 @@ import '@/permission' // permission control
 // Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
 Vue.use(ElementUI)
-
+Object.keys(filters).forEach(key => {
+  Vue.filter(key, filters[key])
+})
 Vue.config.productionTip = false
 
 new Vue({

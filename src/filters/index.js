@@ -1,0 +1,1 @@
+export { timeFormat,timeDate }  from '@/utils'
