@@ -27,7 +27,7 @@ export function addcontract(data,type) {
     data
   })
 }
-export function fetchIssue(data,type) {
+export function fetchIssue(data,type) {//下发任务
   var url = ''
   if(type=='issueTask'){
     url = '/api/admin/contract/distribute/task'
@@ -36,6 +36,34 @@ export function fetchIssue(data,type) {
   }
   return request({
     url,
+    method: 'post',
+    data
+  })
+}
+export function fetchUser(data) {//获取用户
+  return request({
+    url: '/api/admin/user/dept/list',
+    method: 'post',
+    data
+  })
+}
+export function addProgess(data) {//提交进度
+  return request({
+    url: '/api/admin/contract/feedback/projectProgress',
+    method: 'post',
+    data
+  })
+}
+export function fetchTermination(data) {//终止合同
+  return request({
+    url: '/api/admin/contract/termination',
+    method: 'post',
+    data
+  })
+}
+export function fetchrecord(data) {//获取变更记录
+  return request({
+    url: '/api/admin/contract/change/record',
     method: 'post',
     data
   })

@@ -11,7 +11,7 @@
       <el-button v-waves class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary"  @click="handleCreate">
+      <el-button v-if="checkPermission(['admin',3])" class="filter-item" style="margin-left: 10px;" type="primary"  @click="handleCreate">
         新增
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary"  @click="handleRest">
@@ -52,7 +52,7 @@
       </el-table-column>
       
       <el-table-column label="操作" align="left"  class-name="small-padding fixed-width">
-        <template slot-scope="{row}">
+        <template slot-scope="{row}" v-if="checkPermission(['admin',3])">
           <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
@@ -124,7 +124,6 @@
             action=""
             :show-file-list="false"
              :http-request="handleSuccess"
-            
             >
             <img v-if="temp.avatar" :src="temp.avatar" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
@@ -173,6 +172,7 @@
 
 <script>
 import { fetchList,fetchPart,addUser,fetchDel,fetchFrozen,fetchUnFrozen,fetchReset} from '@/api/user'
+import { Upload } from '@/api/upload'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { timeFormat } from '@/utils'
@@ -426,8 +426,11 @@ export default {
     },
     handleSuccess (file) {
         let formdata = new FormData(); 
-        formdata.append('file',file.file );
-        formdata.append('fileType',2);
+        formdata.append('multis',file.file );
+        formdata.append('fileType',14);
+        Upload(formdata).then( res=>{
+          this.temp.avatar=res.data[0].fileUrl
+        })
     },
   }
 }

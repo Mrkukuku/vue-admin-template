@@ -72,34 +72,43 @@
       </el-table-column>
       <el-table-column label="派发状态"  align="center" width="110">
         <template slot-scope="{row}">
-          {{row.isDistribution==1&&'已派发'||'未派发' }}
+          {{row.isDistribution==true&&'已派发'||row.isDistribution==false&&'未派发'||'' }}
         </template>
       </el-table-column>
       <el-table-column label="操作" align="left"  class-name="small-padding fixed-width">
         <template slot-scope="{row}" >
-           <div v-if="checkPermission(['admin',2])&&row.status!=2">
-            <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleUpdate(row)">
+           <div v-if="checkPermission(['admin',2])">
+            <el-button v-if="row.status!=2" type="primary" icon="el-icon-edit" size="mini" @click="handleUpdate(row)">
               编辑
             </el-button>
-            <el-button type="warning" v-if="row.isDistribution==0" icon="el-icon-user-solid" size="mini" @click="handleIssued(row.id,0)">
+            <el-button type="warning" v-if="row.isDistribution==false&&row.status!=2" icon="el-icon-user-solid" size="mini" @click="handleIssued(row.id,0)">
               下发
             </el-button>
+            <el-button type="warning" @click="showProgess(row.projectProgressDesc)" v-if="row.projectProgressDesc&&row.projectProgressDesc.length" icon="el-icon-edit" size="mini">
+              查看进展
+            </el-button>
             <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDel(row.id)">
-            删除
+              删除
             </el-button>
-            <el-button type="primary" icon="el-icon-edit" size="mini">
-            续签
+            <el-button type="danger" v-if="row.status!=2" icon="el-icon-remove-outline" size="mini"  @click="handleTermination(row.id)">
+              终止
             </el-button>
-            <el-button type="danger" icon="el-icon-warning" size="mini" @click="handleDel(row.id)">
-            终止
+            <el-button type="primary"  size="mini"  @click="handleRecord(row.id)">
+              变更记录
             </el-button>
            </div>
            <div v-else>
               <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleUpdate(row,1)">
                 查看详情
               </el-button>
-              <el-button v-if="userInfo.position==2&&row.isDistribution==0&&row.status!=2"  @click="handleIssued(row.id,1)" type="warning" icon="el-icon-user-solid" size="mini"  >
+              <el-button type="warning" @click="showProgess(row.projectProgressDesc)" v-if="row.projectProgressDesc&&row.projectProgressDesc.length"  size="mini">
+                查看进展
+              </el-button>
+              <el-button v-if="userInfo.position==2&&row.isDistribution==false&&row.status!=2"  @click="handleIssued(row.id,1)" type="warning" icon="el-icon-user-solid" size="mini"  >
                 下发
+              </el-button>
+              <el-button v-if="userInfo.position==3&&row.status!=2"  @click="handleProgess(row.id)" type="warning" icon="el-icon-user-solid" size="mini"  >
+                提交进展
               </el-button>
            </div>
         </template>
@@ -131,7 +140,7 @@
         </el-form-item>
          <el-form-item label="支付方式" prop="paymentType">
            <el-select v-model="temp.paymentType"  clearable style="width: 130px" class="filter-item">
-                <el-option v-for="item in paymentOptions" :key="item.id" :label="item.name" :value="item.id" />
+                <el-option v-for="item in paymentOptions" :key="item.id" :label="item.name" :value="item.id"/>
             </el-select>
         </el-form-item>
         </el-form-item>
@@ -141,7 +150,7 @@
             type="date"
             placeholder="开始日期"
             :picker-options="expireTimeOptionStart"
-                value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd"
             class="picker">
             </el-date-picker>
         </el-form-item>
@@ -150,7 +159,7 @@
             v-model="temp.endTime"
             type="date"
             :picker-options="expireTimeOptionEnd"
-                value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd"
             placeholder="结束日期"
             class="picker">
          </el-date-picker>
@@ -158,7 +167,7 @@
           <el-form-item label="变更理由" prop="contractDesc" v-if="dialogStatus == 'update'">
           <el-input v-model="temp.contractDesc" type="textarea"/>
         </el-form-item>
-         <el-form-item label="合同原件" prop="fileUrls">
+         <el-form-item label="合同原件" prop="fileUrls" v-if="!disabled">
              <el-upload
                 ref="upload"
                 action=""
@@ -170,21 +179,12 @@
                 <el-button type="primary" slot="trigger">上传</el-button>
             </el-upload>
         </el-form-item>
-         <!-- <el-form-item label="项目进展情况" prop="name">
-            <el-upload
-                ref="upload"
-                action=""
-                :file-list="temp.images"
-                :limit="3"
-                :http-request="uploadsFile"
-                :on-remove="handleRemoveFile"
-                 accept=".jpg,.png,.JPG,.PNG"
-                >
-                <el-button type="primary" slot="trigger">上传</el-button>
-            </el-upload>
-        </el-form-item> -->
+         <el-form-item label="合同原件"  v-else>
+               <div class="down" v-for="(item, index) in temp.fileUrls" :key="index" @click="download(item.fileUrl,item.name)">
+                    {{item.name}}
+              </div>
+        </el-form-item>
         </fieldset>
-
       </el-form>
       <div slot="footer" class="dialog-footer" v-if="!disabled">
         <el-button @click="dialogFormVisible = false">
@@ -217,11 +217,41 @@
             </el-button>
       </div>
     </el-dialog>
+    <el-dialog title="项目进展情况" :visible.sync="progressVisible" width="500px">
+        <el-form ref="progressForm" label-position="right" label-width="110px">
+        <el-form-item label="进展情况" prop="projectProgressDesc" v-if="progressFlag">
+               <el-upload
+                ref="upload"
+                action=""
+                :file-list="projectProgressDesc"
+                :limit="3"
+                :http-request="uploadsFile1"
+                :on-remove="handleRemoveFile1"
+                >
+                <el-button type="primary" slot="trigger">上传</el-button>
+            </el-upload>
+        </el-form-item>
+          <el-form-item label="进展情况" v-else>
+              <div class="down" v-for="(item, index) in projectProgressDesc" :key="index" @click="download(item.fileUrl,item.name)">
+                    {{item.name}}
+              </div>
+          </el-form-item>
+        </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="progressVisible = false">
+              取消
+            </el-button>
+            <el-button v-if="progressFlag" type="primary" @click="createProgess">
+              确定
+            </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { fetchList,addcontract,fetchDel,fetchIssue} from '@/api/contract'
+import { fetchList,addcontract,fetchDel,fetchIssue,fetchUser,addProgess,fetchTermination } from '@/api/contract'
+import { Upload } from '@/api/upload'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import checkPermission from '@/utils/permission'
@@ -244,6 +274,8 @@ export default {
       listLoading: true,//
       dialogFormVisible:false,//合同开关
       userFormVisible:false,//下发开关
+      progressVisible:false,//进展开关
+      progressFlag:true,
       disabled:false,
       listQuery: {//筛选条件
         pageNum: 1,
@@ -266,6 +298,7 @@ export default {
         secondPartyName :'',//(string, optional): 乙方名称 ,
         startTime :'',//(string, optional): 合同开始时间
         contractDesc:'',//变更理由
+        projectProgressDesc:[],//合同进展情况
       },
       temp1:{
         departmentId:'',
@@ -274,6 +307,7 @@ export default {
       },
       rules: {
         contractAmount: [{ required: true, message: '请输入', trigger: 'blur' }],
+        contractDesc: [{ required: true, message: '请输入', trigger: 'blur' }],
         contractName: [{ required: true, message: '请输入', trigger: 'blur' }],
         contractNum: [{ required: true, message: '请输入', trigger: 'blur' }],
         endTime: [{ required: true, message: '请输入', trigger: 'blur' }],
@@ -371,6 +405,8 @@ export default {
                 }
             },
         },
+        projectProgressDesc:[],//进展情况
+        id:'',//合同id
     }
   },
   created() {
@@ -378,26 +414,79 @@ export default {
   },
   methods: {
     checkPermission,
-    issuedTask (){
-      fetchIssue(this.temp1).then( res=>{
-         this.$message({
-            message:'下发成功',
-            type: 'success',
-            duration: 2 * 1000
-          })
+    handleRecord(id){
+      this.$router.push({name:'Contractchange',params:{id}})
+    },
+    handleTermination(id){
+       this.$confirm('你确定要终止吗').then(()=> {
+         fetchTermination({id}).then( res=> {
+           this.getList()
+           this.$message({
+                message:'已终止',
+                type: 'success',
+                duration: 2 * 1000
+              })
+        })
       })
     },
-    handleIssued(id,type){//下发任务
+    showProgess(data){
+      this.projectProgressDesc = data
+      this.progressVisible = true
+      this.progressFlag = false
+    },
+    handleProgess(id){
+      this.progressVisible = true
+      this.progressFlag = true
+      this.projectProgressDesc = []
+      this.id = id
+    },
+    createProgess(){
+        if(this.projectProgressDesc.length){
+             addProgess({
+              id:this.id,
+              projectProgressDesc:this.projectProgressDesc
+            }).then( res=>{
+              this.progressVisible = false
+              this.getList()
+            })
+        }
+     
+    },
+    issuedTask (){//下发任务
+        if(this.temp1.uid){
+          fetchIssue(this.temp1, this.issueStatus).then( res=>{
+            this.userFormVisible = false
+            this.getList()
+            this.$message({
+                message:'下发成功',
+                type: 'success',
+                duration: 2 * 1000
+              })
+          })
+        }
+    },
+    handleIssued(id,type){//下发任务界面
+     Object.assign(this.$data.temp1,this.$options.data().temp1);
       this.temp1.id = id
       this.userFormVisible = true
       if(type==0){
         this.issueStatus = 'issueTask'
       }else{
          this.issueStatus = 'issueUser'
+         this.getUser(this.userInfo.departmentId,1)
       }
     },
-    getUser(id){//获取人员
+    getUser(departmentId,type){//获取人员
       this.uid = ''
+      let position = ''
+      if(type==1){
+        position = 3
+      }else{
+        position = 2
+      }
+      fetchUser({departmentId,position}).then( res =>{
+        this.userOptions = res.data
+      })
     },
     getList(){//获取列表
       fetchList(this.listQuery).then(res=>{
@@ -427,7 +516,7 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
       if(type==1){
-        this.disabled = true
+         this.disabled = true
       }
     },
      createData() {//提交表单
@@ -471,16 +560,36 @@ export default {
        Object.assign(this.$data.temp,this.$options.data().temp);
     },
     uploadsFile(file){
-
+        let formdata = new FormData(); 
+        formdata.append('multis',file.file );
+        formdata.append('fileType',14);
+         Upload(formdata).then( res=>{
+          this.temp.fileUrls.push(res.data[0])
+        })
     },
-    handleRemoveFile(file){//移除某个图片
-        for(var i in this.ruleForm.fileUrls ){
-            if(this.ruleForm.fileUrls [i].uid==file.uid){
-                this.ruleForm.fileUrls.splice(i,1);
+    uploadsFile1(file){
+        let formdata = new FormData(); 
+        formdata.append('multis',file.file );
+        formdata.append('fileType',14);
+        Upload(formdata).then( res=>{
+          this.projectProgressDesc.push(res.data[0])
+        })
+    },
+    handleRemoveFile(file){//移除
+        for(var i in this.temp.fileUrls ){
+            if(this.temp.fileUrls[i].name==file.name){
+                this.temp.fileUrls.splice(i,1);
             }
         }
     },
-     download(url, filename) {
+    handleRemoveFile1(file){//移除
+        for(var i in this.projectProgressDesc ){
+            if(this.projectProgressDesc[i].name==file.name){
+                this.projectProgressDesc.splice(i,1);
+            }
+        }
+    },
+    download(url, filename) {
         var _this =this
         this.getBlob(url, function(blob) {
             _this.saveAs(blob, filename);
@@ -491,9 +600,9 @@ export default {
         xhr.open('GET', url, true);
         xhr.responseType = 'blob';
         xhr.onload = function() {
-                if (xhr.status === 200) {
-                    cb(xhr.response);
-                }
+            if (xhr.status === 200) {
+                cb(xhr.response);
+            }
         };
         xhr.send();
     },
@@ -529,5 +638,10 @@ export default {
   }
   fieldset{
     border: none;
+  }
+  .down{
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
   }
 </style>

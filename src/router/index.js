@@ -73,7 +73,49 @@ export const asyncRoutes = [
         meta: { 
           title: '人员管理', 
           icon: 'user', 
-          // roles: [3] 
+         }
+      }
+    ]
+  },
+  {
+    path: '/contract',
+    component: Layout,
+    redirect: '/contract/index',
+    children: [
+      {
+        path: 'index',
+        name: 'Contract',
+        component: () => import('@/views/contract/index'),
+        meta: { 
+          title: '合同管理', 
+          icon: 'contract', 
+          roles: [2,4,5,6,7] 
+         }
+      },
+      {
+        path: 'contractchange',
+        name: 'Contractchange',
+        component: () => import('@/views/contract/contract-change'),
+        meta: { 
+          title: '合同变更', 
+          icon: 'contract', 
+         },
+         hidden: true
+      }
+    ]
+  },
+  {
+    path: '/collection',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Collection',
+        component: () => import('@/views/collection/index'),
+        meta: { 
+          title: '收款管理', 
+          icon: 'money', 
+          roles: [2,8] 
          }
       }
     ]
@@ -89,23 +131,6 @@ export const asyncRoutes = [
         meta: { 
           title: '单位管理', 
           icon: 'unit', 
-          // roles: ['admin'] 
-         }
-      }
-    ]
-  },
-  {
-    path: '/contract',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Contract',
-        component: () => import('@/views/contract/index'),
-        meta: { 
-          title: '合同管理', 
-          icon: 'contract', 
-          // roles: ['admin'] 
          }
       }
     ]

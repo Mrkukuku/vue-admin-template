@@ -5,7 +5,7 @@
       <el-button v-waves class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary"  @click="handleCreate">
+      <el-button v-if="checkPermission(['admin',3])" class="filter-item" style="margin-left: 10px;" type="primary"  @click="handleCreate">
         新增
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary"  @click="handleRest">
@@ -35,7 +35,7 @@
       </el-table-column>
       
       <el-table-column label="操作" align="left"  class-name="small-padding fixed-width">
-        <template slot-scope="{row}" v-if="checkPermission(['admin'])">
+        <template slot-scope="{row}" v-if="checkPermission(['admin',3])">
           <el-button type="primary" icon="el-icon-edit" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import { fetchList,addUnit,fetchDel} from '@/api/unit'
+import { fetchList,addUnit,fetchDel } from '@/api/unit'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import checkPermission from '@/utils/permission'
