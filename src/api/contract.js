@@ -68,3 +68,11 @@ export function fetchrecord(data) {//获取变更记录
     data
   })
 }
+
+export function fetchUnit(data) {
+  return request({
+    url: '/api/admin/unit/list',
+    method: 'post',
+    data
+  })
+}

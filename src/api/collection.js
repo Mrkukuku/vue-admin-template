@@ -34,3 +34,17 @@ export function fetchTitle(data) {
     data
   })
 }
+export function fetchInvoice(data) {
+  return request({
+    url: '/api/admin/payment/plan/invoice',
+    method: 'post',
+    data
+  })
+}
+export function fetchContract(data) {
+  return request({
+    url: '/api/admin/contract/all',
+    method: 'post',
+    data
+  })
+}

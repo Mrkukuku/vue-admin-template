@@ -1,36 +1,41 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">name: {{ name }}</div>
-    <div class="dashboard-text">roles: <span v-for="role in roles" :key="role">{{ role }}</span></div>
+    <component :is="currentRole" />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import adminDashboard from './admin'
+import editorDashboard from './editor'
 
 export default {
   name: 'Dashboard',
+  components: { adminDashboard, editorDashboard },
+  data() {
+    return {
+      currentRole: 'adminDashboard'
+    }
+  },
   computed: {
     ...mapGetters([
-      'name',
       'roles'
     ])
+  },
+  created() {
+    let permissionRoles = ['admin',2,8]
+    const hasPermission = this.roles.some(role => {
+      return permissionRoles.includes(role)
+    })
+    if(!hasPermission){
+       this.currentRole = 'editorDashboard'
+    }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-.dashboard {
-  &-container {
-    padding: 30px;
-    background-color: #f0f2f5;
-    // box-sizing: border-box;
-    height: 100%;
-    width: 100%;
-  }
-  &-text {
-    font-size: 30px;
-    line-height: 46px;
-  }
-}
+<style>
+    .dashboard-container{
+      height: 100%;
+    }
 </style>

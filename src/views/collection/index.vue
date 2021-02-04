@@ -67,7 +67,7 @@
           <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDel(row.id)">
            删除
           </el-button>
-           <el-button type="primary"  size="mini" @click="handleinvoice(row.id)">
+           <el-button  v-if="row.isApplicationInvoice==false" type="primary"  size="mini" @click="handleinvoice(row.id)">
             开票
           </el-button>
         </template>
@@ -77,15 +77,19 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNum" :limit.sync="listQuery.pageSize" @pagination="getList" />
      
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="right" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="收款合同" prop="contractId">
+            <el-select v-model="temp.contractId"  clearable style="width: 280px" class="filter-item">
+                <el-option v-for="item in contractOptions" :key="item.id" :label="item.name" :value="item.id"/>
+            </el-select>
+        </el-form-item>
          <el-form-item label="申请开票金额" prop="applicationInvoiceAmount">
           <el-input v-model="temp.applicationInvoiceAmount" />
         </el-form-item>
          <el-form-item label="预计收款金额" prop="estimatedReceivablesAmount">
           <el-input v-model="temp.estimatedReceivablesAmount" />
         </el-form-item>
-        
-       
         <el-form-item label="销售方银行账号" prop="invoiceAccountNumber">
             <el-input v-model="temp.invoiceAccountNumber"></el-input>
         </el-form-item>
@@ -107,11 +111,12 @@
             type="date"
             placeholder="预计收款时间"
             value-format="yyyy-MM-dd"
-            class="picker">
+            style="width: 280px"
+            >
             </el-date-picker>
         </el-form-item>
         <el-form-item label="发票类型" prop="invoiceType">
-            <el-select v-model="temp.invoiceType"  clearable style="width: 130px" class="filter-item">
+            <el-select v-model="temp.invoiceType"  clearable style="width: 280px" class="filter-item">
                 <el-option v-for="item in invoiceOptions" :key="item.id" :label="item.name" :value="item.id"/>
             </el-select>
         </el-form-item>
@@ -132,7 +137,7 @@
 </template>
 
 <script>
-import { fetchList,addList,fetchDel,fetchTitle } from '@/api/collection'
+import { fetchList,addList,fetchDel,fetchTitle,fetchInvoice,fetchContract } from '@/api/collection'
 
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -154,6 +159,7 @@ export default {
         pageSize: 10,
       },
       temp: {
+        contractId:'',//合同id
         applicationInvoiceAmount :'',//(string, optional): 申请开票金额 ,
         collectionTerms :'',//(string, optional): 收款条件 ,
         estimatedReceivablesAmount :'',//(string, optional): 预计收款金额 ,
@@ -166,6 +172,7 @@ export default {
         invoiceType :'',//(integer, optional): 发票类型(1 专票 2 普票)
       },
       rules: {
+        contractId: [{ required: true, message: '请选择', trigger: 'blur' }],
         applicationInvoiceAmount: [{ required: true, message: '请输入', trigger: 'blur' }],
         invoicePhone: [{ required: true, message: '请输入', trigger: 'blur' }],
         estimatedReceivablesAmount: [{ required: true, message: '请输入', trigger: 'blur' }],
@@ -192,17 +199,34 @@ export default {
           id:2
         },
       ],
-      statistics:null,
+      contractOptions:[],
+      statistics:{
+        estimatedReceivablesTotalAmount: "0.0",
+        invoicedAmount: "0.0",
+        outstandingTotalAmount: "0.0",
+        receivedTotalAmount: "0.0",
+        uninvoicedAmount: "0.0",
+      },
     }
   },
   created() {
     this.getList()
+    fetchContract().then(res =>{
+      this.contractOptions = res.data
+    })
   },
   methods: {
     checkPermission,
     handleinvoice(id){
       this.$confirm('财务会收到开票提醒').then(()=> {
-        
+        fetchInvoice({id}).then( res=>{
+           this.getList()
+           this.$message({
+                message:'开票成功',
+                type: 'success',
+                duration: 2 * 1000
+            })
+        })
       })
     },
     getList(){//获取列表
@@ -272,12 +296,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  $dark_gray:#889aa4;
   .filter-container {
     padding-bottom: 10px;
     display: flex;
   }
   .title{
-   width:180px;vertical-align: middle;margin-left:10px;
+      width:185px;vertical-align: middle;margin-left:10px;
+      min-width: 180px;
   }
 </style>

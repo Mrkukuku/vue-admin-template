@@ -188,7 +188,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  $dark_gray:#889aa4;
   .filter-container {
     padding-bottom: 10px;
   }

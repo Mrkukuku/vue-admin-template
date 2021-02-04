@@ -49,9 +49,11 @@
       type="index"
       width="50">
     </el-table-column>
-      <el-table-column label="合同编号" prop="contractNum"  align="center" width="260">
+      <el-table-column label="合同名称" prop="contractName"  align="center" width="200">
       </el-table-column>
-      <el-table-column label="合同金额" prop="contractAmount"  align="center" width="160">
+      <el-table-column label="合同编号" prop="contractNum"  align="center" width="200">
+      </el-table-column>
+      <el-table-column label="合同金额" prop="contractAmount"  align="center" width="140">
       </el-table-column>
       <el-table-column label="开始日期"  align="center" width="130">
         <template slot-scope="{row}">
@@ -63,7 +65,7 @@
              {{row.endTime|timeDate}}
         </template>
       </el-table-column>
-      <el-table-column label="经办人" prop="uname"  align="center" width="160">
+      <el-table-column label="经办人" prop="uname"  align="center" width="110">
       </el-table-column>
       <el-table-column label="合同状态"  align="center" width="110">
         <template slot-scope="{row}">
@@ -133,13 +135,17 @@
           <el-input v-model="temp.projectName" />
         </el-form-item>
          <el-form-item label="甲方名称" prop="firstPartyName">
-          <el-input v-model="temp.firstPartyName" />
+          <el-select v-model="temp.firstPartyName"  filterable  clearable style="width: 265px" class="filter-item">
+                <el-option v-for="item in unitOptions" :key="item.id" :label="item.name" :value="item.name"/>
+            </el-select>
         </el-form-item>
          <el-form-item label="乙方名称" prop="secondPartyName">
-          <el-input v-model="temp.secondPartyName" />
+           <el-select v-model="temp.secondPartyName" filterable   clearable style="width: 265px" class="filter-item">
+                <el-option v-for="item in unitOptions" :key="item.id" :label="item.name" :value="item.name"/>
+            </el-select>
         </el-form-item>
          <el-form-item label="支付方式" prop="paymentType">
-           <el-select v-model="temp.paymentType"  clearable style="width: 130px" class="filter-item">
+           <el-select v-model="temp.paymentType"  clearable style="width: 265px" class="filter-item">
                 <el-option v-for="item in paymentOptions" :key="item.id" :label="item.name" :value="item.id"/>
             </el-select>
         </el-form-item>
@@ -151,7 +157,7 @@
             placeholder="开始日期"
             :picker-options="expireTimeOptionStart"
             value-format="yyyy-MM-dd"
-            class="picker">
+           style="width: 265px">
             </el-date-picker>
         </el-form-item>
          <el-form-item label="合同结束时间" prop="endTime">
@@ -161,7 +167,7 @@
             :picker-options="expireTimeOptionEnd"
             value-format="yyyy-MM-dd"
             placeholder="结束日期"
-            class="picker">
+           style="width: 265px">
          </el-date-picker>
          </el-form-item>
           <el-form-item label="变更理由" prop="contractDesc" v-if="dialogStatus == 'update'">
@@ -181,7 +187,7 @@
         </el-form-item>
          <el-form-item label="合同原件"  v-else>
                <div class="down" v-for="(item, index) in temp.fileUrls" :key="index" @click="download(item.fileUrl,item.name)">
-                    {{item.name}}
+                    {{item.name}} <i class="el-icon-download"></i>
               </div>
         </el-form-item>
         </fieldset>
@@ -233,7 +239,7 @@
         </el-form-item>
           <el-form-item label="进展情况" v-else>
               <div class="down" v-for="(item, index) in projectProgressDesc" :key="index" @click="download(item.fileUrl,item.name)">
-                    {{item.name}}
+                    {{item.name}} <i class="el-icon-download"></i>
               </div>
           </el-form-item>
         </el-form>
@@ -250,7 +256,7 @@
 </template>
 
 <script>
-import { fetchList,addcontract,fetchDel,fetchIssue,fetchUser,addProgess,fetchTermination } from '@/api/contract'
+import { fetchList,addcontract,fetchDel,fetchIssue,fetchUser,addProgess,fetchTermination,fetchUnit } from '@/api/contract'
 import { Upload } from '@/api/upload'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -407,13 +413,22 @@ export default {
         },
         projectProgressDesc:[],//进展情况
         id:'',//合同id
+        unitOptions:[]
     }
   },
   created() {
     this.getList()
+    fetchUnit({
+        pageNum: 1,
+        pageSize: 1000,
+        name:''
+    }).then(res=>{
+      this.unitOptions = res.list
+    })
   },
   methods: {
     checkPermission,
+    
     handleRecord(id){
       this.$router.push({name:'Contractchange',params:{id}})
     },
@@ -632,7 +647,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  $dark_gray:#889aa4;
   .filter-container {
     padding-bottom: 10px;
   }
@@ -640,8 +654,13 @@ export default {
     border: none;
   }
   .down{
-    color: blue;
+    color:  #606266;
     cursor: pointer;
     text-decoration: underline;
+    display: flex;
+    align-items: center;
+    i{
+      margin-left: 5px;
+    }
   }
 </style>

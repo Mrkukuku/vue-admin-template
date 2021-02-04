@@ -19,17 +19,17 @@
       width="50">
     </el-table-column>
      
-      <el-table-column label="变更时间"   width="230">
+      <el-table-column label="变更时间"width="230">
         <template slot-scope="{row}">
             {{row.updatedTime|timeFormat}}
         </template>
       </el-table-column>
-      <el-table-column label="变更事项"  width="560">
+      <el-table-column label="变更事项" >
         <template slot-scope="{row}">
           <div v-html="row.changeDesc"></div>
         </template>
       </el-table-column>
-      <el-table-column label="变更理由" prop="changeReason"   >
+      <el-table-column label="变更理由" prop="changeReason">
       </el-table-column>
     </el-table>
 
@@ -47,6 +47,7 @@ export default {
   name: 'contractChange',
   components: { Pagination },
   directives: { waves },
+  props: ['id'],
   data() {
     return {
       tableKey: 0,
@@ -60,9 +61,9 @@ export default {
     }
   },
   created() {
-    console.log(this.$route)
-    this.listQuery.id = this.$route.params.id
-    if(this.listQuery.id){
+    // this.listQuery.id = this.$route.params.id
+    if(this.id){
+       this.listQuery.id = this.id
        this.getList()
     }
   },
@@ -82,16 +83,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  $dark_gray:#889aa4;
   .filter-container {
     padding-bottom: 10px;
-  }
-  fieldset{
-    border: none;
-  }
-  .down{
-    color: blue;
-    cursor: pointer;
-    text-decoration: underline;
   }
 </style>

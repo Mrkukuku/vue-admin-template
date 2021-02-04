@@ -209,7 +209,6 @@ $light_gray:#eee;
 
   .title-container {
     position: relative;
-
     .title {
       font-size: 26px;
       color: $light_gray;

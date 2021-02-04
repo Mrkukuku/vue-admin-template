@@ -36,23 +36,27 @@ export const constantRoutes = [
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
+ 
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/user',
+    children: [
+      {
+        path: 'user',
+        name: 'User',
+        component: () => import('@/views/user/index'),
+        meta: { 
+          title: '人员管理', 
+          icon: 'user', 
+         }
+      }
+    ]
+  },
   {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true
-  },
-
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/home',
-    children: [{
-      path: 'home',
-      name: 'Home',
-      component: () => import('@/views/home/index'),
-      meta: { title: '首页', icon: 'el-icon-s-home' }
-    }]
   },
 ]
 
@@ -63,18 +67,19 @@ export const constantRoutes = [
  */
 export const asyncRoutes = [
   {
-    path: '/user',
+    path: '/home',
     component: Layout,
     children: [
       {
         path: 'index',
-        name: 'User',
-        component: () => import('@/views/user/index'),
+        name: 'Home',
+        component: () => import('@/views/home/index'),
         meta: { 
-          title: '人员管理', 
-          icon: 'user', 
-         }
-      }
+          title: '统计管理', 
+          icon: 'home',
+          roles: [2,4,5,6,7,8] 
+        },
+     }
     ]
   },
   {
@@ -89,18 +94,20 @@ export const asyncRoutes = [
         meta: { 
           title: '合同管理', 
           icon: 'contract', 
-          roles: [2,4,5,6,7] 
+          roles: [2,4,5,6,7,8] 
          }
       },
       {
-        path: 'contractchange',
+        path: 'contractchange/:id',
         name: 'Contractchange',
         component: () => import('@/views/contract/contract-change'),
         meta: { 
           title: '合同变更', 
           icon: 'contract', 
+          noCache: true, activeMenu: '/contract/index'
          },
-         hidden: true
+         hidden: true,
+         props: true
       }
     ]
   },
@@ -116,6 +123,22 @@ export const asyncRoutes = [
           title: '收款管理', 
           icon: 'money', 
           roles: [2,8] 
+         }
+      }
+    ]
+  },
+  {
+    path: '/invoice',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Invoice',
+        component: () => import('@/views/make-invoice/index'),
+        meta: { 
+          title: '付款管理', 
+          icon: 'money',
+          roles: [1]  
          }
       }
     ]

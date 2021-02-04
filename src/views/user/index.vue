@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.username " placeholder="名字" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.departmentId " placeholder="部门" clearable style="width: 130px" class="filter-item">
+      <el-select  v-if="checkPermission(['admin',3])" v-model="listQuery.departmentId " placeholder="部门" clearable style="width: 130px" class="filter-item">
         <el-option v-for="item in calendarTypeOptions" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
       <el-select v-model="listQuery.position" placeholder="职位" clearable class="filter-item" style="width: 130px">
@@ -78,12 +78,12 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
          <el-form-item label="部门" prop="departmentId" v-if="temp.position!=1">
-          <el-select v-model="temp.departmentId" class="filter-item" placeholder="请选择">
+          <el-select v-model="temp.departmentId" class="filter-item" placeholder="请选择" style="width: 330px">
             <el-option v-for="item in calendarTypeOptions" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
          <el-form-item label="职位" prop="position" v-if="temp.position!=1">
-          <el-select v-model="temp.position" class="filter-item" placeholder="请选择">
+          <el-select v-model="temp.position" class="filter-item" placeholder="请选择" style="width: 330px">
             <el-option v-for="item in positionList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
@@ -177,11 +177,17 @@ import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { timeFormat } from '@/utils'
 import checkPermission from '@/utils/permission'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'user',
   components: { Pagination },
   directives: { waves },
+   computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
   data() {
      var phone=(rule, value, callback)=>{
             if(value){
