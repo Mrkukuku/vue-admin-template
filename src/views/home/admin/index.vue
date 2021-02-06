@@ -21,24 +21,37 @@
       </el-button>
     </div>
     <panel-group :panel-data="panelData"/>
-    <div class="title">收入统计</div>
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;height:300px">
+    <!-- <div class="title">收入统计</div> -->
+    <!-- <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;height:300px">
       <line-chart :chart-data="lineChartData" />
     </el-row>
     <div class="title">合同统计</div>
     <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;height:300px">
         <bar-chart :chart-data="barChartData" />
+    </el-row> -->
+    
+    <el-row :gutter="32">
+      <el-col :xs="24" :sm="24" :lg="12">
+        <div class="chart-wrapper">
+            <line-chart :chart-data="lineChartData" />
+        </div>
+      </el-col>
+      <el-col :xs="24" :sm="24" :lg="12">
+        <div class="chart-wrapper">
+         <bar-chart :chart-data="barChartData" />
+        </div>
+      </el-col>
     </el-row>
 
-    <el-row :gutter="8">
-      <el-col :xs="{span: 24}"  :sm="{span: 24}" :md="{span: 24}" :lg="{span: 8}" :xl="{span: 8}" class="remind" style="padding-right:8px;">
-        <transaction-table :lables="'合同到期提醒'" />
+    <el-row :gutter="16">
+      <el-col :xs="{span: 24}"  :sm="{span: 24}" :md="{span: 24}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
+        <transaction-table :lables="'合同到期提醒'" :type="1"/>
       </el-col>
-      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
-       <transaction-table  :lables="'项目完成提醒'"/>
+      <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 12}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
+       <transaction-table  :lables="'项目完成提醒'" :type="2"/>
       </el-col>
-      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
-        <transaction-table :lables="'收付款提醒'" />
+      <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 12}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
+        <transaction-table :lables="'收付款提醒'"  :type="3"/>
       </el-col>
     </el-row>
   </div>
@@ -46,12 +59,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { fetchTotal,fetchRevenue,fetchCount } from '@/api/home'
+import { fetchTotal,fetchRevenue,fetchCount, } from '@/api/home'
 import { fetchUser } from '@/api/contract'
 import PanelGroup from './components/PanelGroup'
 import LineChart from './components/LineChart'
 import BarChart from './components/BarChart'
-import TodoList from './components/TodoList'
 import TransactionTable from './components/TransactionTable'
 export default {
   name: 'DashboardAdmin',
@@ -59,7 +71,6 @@ export default {
     PanelGroup,
     LineChart,
     BarChart,
-    TodoList,
     TransactionTable
   },
    computed: {
@@ -80,6 +91,8 @@ export default {
         uid:'',
         year:null,
         type:1,
+        pageSize:1000,
+        pageNum:1,
       },
        calendarTypeOptions:[//部门列表
         {
@@ -125,6 +138,7 @@ export default {
       let p2= fetchCount(this.temp).then( res=>{
         this.barChartData = res.data
       })
+      
       Promise.all([p,p1,p2]).then(res=>{
          this.fullscreenLoading = false
       }).catch(error =>{
@@ -164,6 +178,8 @@ export default {
     background: #fff;
     padding: 16px 16px 0;
     margin-bottom: 32px;
+    height: 316px;
+    box-sizing: border-box;
   }
   .title{
     margin-bottom: 10px;
@@ -173,12 +189,6 @@ export default {
   }
   .remind{
     margin-bottom:30px;height:350px
-  }
-}
-
-@media (max-width:1024px) {
-  .chart-wrapper {
-    padding: 8px;
   }
 }
 </style>

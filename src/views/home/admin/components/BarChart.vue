@@ -22,7 +22,7 @@ export default {
     },
     height: {
       type: String,
-      default: '100%'
+      default: '300px'
     },
     chartData: {
       type: Object,
@@ -94,7 +94,15 @@ export default {
           stack: 'vistors',
           barWidth: '60%',
           data: countList,
-          animationDuration
+          animationDuration,
+          itemStyle: {
+            normal: {
+              color: ' #40c9c6',
+              lineStyle: {
+                color: ' #40c9c6',
+              }
+            }
+          },
         },]
       })
     }

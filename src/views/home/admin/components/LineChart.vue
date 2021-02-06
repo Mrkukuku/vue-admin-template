@@ -20,7 +20,7 @@ export default {
     },
     height: {
       type: String,
-      default: '100%'
+      default: '300px'
     },
     autoResize: {
       type: Boolean,
@@ -94,9 +94,9 @@ export default {
           name: title, 
           itemStyle: {
             normal: {
-              color: '#FF005A',
+              color: '#36a3f7',
               lineStyle: {
-                color: '#FF005A',
+                color: '#36a3f7',
                 width: 2
               }
             }

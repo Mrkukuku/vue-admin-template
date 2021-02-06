@@ -19,8 +19,19 @@
     </div>
     <panel-group :panel-data="panelData"/>
     <div class="title">任务统计</div>
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;height:60%;" :height="height">
+    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;height:316px;">
       <line-chart :chart-data="lineChartData" />
+    </el-row>
+     <el-row :gutter="16">
+      <el-col :xs="{span: 24}"  :sm="{span: 24}" :md="{span: 24}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
+        <transaction-table :lables="'合同到期提醒'"  :type="1"/>
+      </el-col>
+      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
+       <transaction-table  :lables="'项目完成提醒'" :type="2"/>
+      </el-col>
+      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 8}" :xl="{span: 8}" class="remind">
+        <transaction-table :lables="'收付款提醒'"  :type="3"/>
+      </el-col>
     </el-row>
   </div>
 </template>
@@ -31,13 +42,14 @@ import { fetchTotal,fetchTaskNum } from '@/api/home'
 import { fetchUser } from '@/api/contract'
 import PanelGroup from './components/PanelGroup'
 import LineChart from '../admin/components/LineChart'
-
+import TransactionTable from '../admin/components/TransactionTable'
 
 export default {
   name: 'DashboardAdmin',
   components: {
     PanelGroup,
     LineChart,
+    TransactionTable
   },
   computed: {
     ...mapGetters([
@@ -49,9 +61,7 @@ export default {
       lineChartData: {
         "countList":[0,0],"monthList":["1月","2月",'3月']
       },
-      panelData:{
-      },
-      height:'500px',
+      panelData:{},
       temp:{
         uid:'',
         year:null,
@@ -86,7 +96,7 @@ export default {
          this.lineChartData.title = '数量'
       })
     },
-     getUser(departmentId){//获取人员
+    getUser(departmentId){//获取人员
       fetchUser({departmentId,position:3}).then( res =>{
         this.userOptions = res.data
       })

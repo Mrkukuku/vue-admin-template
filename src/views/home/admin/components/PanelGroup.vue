@@ -1,23 +1,6 @@
 <template>
-  <el-row  class="panel-group">
-    <el-col :xs="24" :sm="24" :lg="11" class="card-panel-col">
-      <div class="card-panel">
-        <div class="card-panel-icon-wrapper icon-people">
-          <svg-icon icon-class="num" class-name="card-panel-icon" />
-        </div>
-        <div class="card-panel-description">
-          <div class="card-panel-text">
-          签订合同
-          </div>
-          <!-- <count-to :start-val="0" :end-val="panelData.signContractNum" :duration="1600" class="card-panel-num" /> -->
-            <div class="card-panel-num">{{panelData.signContractNum}}</div>
-        </div>
-      </div>
-    </el-col>
-    <el-col :xs="24" :sm="24" :lg="2" class="card-panel-col">
-      <!-- <div class="card-panel"></div> -->
-    </el-col>
-    <el-col :xs="24" :sm="24" :lg="11"  class="card-panel-col">
+  <el-row :gutter="32" class="panel-group">
+     <el-col :xs="24" :sm="24" :lg="12"  class="card-panel-col">
       <div class="card-panel">
         <div class="card-panel-icon-wrapper icon-message">
           <svg-icon icon-class="money" class-name="card-panel-icon" />
@@ -31,6 +14,21 @@
         </div>
       </div>
     </el-col>
+    <el-col :xs="24" :sm="24" :lg="12" class="card-panel-col">
+      <div class="card-panel">
+        <div class="card-panel-icon-wrapper icon-people">
+          <svg-icon icon-class="num" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">
+          签订合同
+          </div>
+          <!-- <count-to :start-val="0" :end-val="panelData.signContractNum" :duration="1600" class="card-panel-num" /> -->
+            <div class="card-panel-num">{{panelData.signContractNum}}</div>
+        </div>
+      </div>
+    </el-col>
+   
   </el-row>
 </template>
 
