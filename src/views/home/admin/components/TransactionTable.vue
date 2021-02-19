@@ -17,7 +17,6 @@
 <script>
 import { fetchNotice,updateNotice } from '@/api/home'
 export default {
-  
   props: {
     lables: {
       type: String,
@@ -50,7 +49,7 @@ export default {
       updateNotice({id,isRead:true}).then(res =>{
         this.fetchData()
       })
-    }
+    },
   }
 }
 </script>

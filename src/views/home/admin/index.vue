@@ -80,12 +80,9 @@ export default {
   },
   data() {
     return {
-      lineChartData: {
-        "countList":[0,0],"monthList":["1月","2月",'3月']
-      },
+      lineChartData: {"countList":[0,0],"monthList":["1月","2月",'3月']},
       barChartData:{"countList":[0,0],"monthList":["1月","2月",'3月']},
-      panelData:{
-      },
+      panelData:{},
       temp:{
         departmentId:'',
         uid:'',
@@ -130,15 +127,14 @@ export default {
       let p = fetchTotal(this.temp).then( res=>{
         this.panelData = res.data
       })
-      let p1= fetchRevenue(this.temp).then( res=>{
+      let p1 = fetchRevenue(this.temp).then( res=>{
         this.lineChartData = res.data
         this.lineChartData.title = '收入'
-         this.fullscreenLoading = false
+        this.fullscreenLoading = false
       })
-      let p2= fetchCount(this.temp).then( res=>{
+      let p2 = fetchCount(this.temp).then( res=>{
         this.barChartData = res.data
       })
-      
       Promise.all([p,p1,p2]).then(res=>{
          this.fullscreenLoading = false
       }).catch(error =>{
@@ -158,7 +154,7 @@ export default {
         })
       }
     },
-    handleRest(){
+    handleRest(){//
        Object.assign(this.$data.temp,this.$options.data().temp);
        this.getTotal()
     },

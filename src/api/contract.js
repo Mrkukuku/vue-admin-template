@@ -76,3 +76,10 @@ export function fetchUnit(data) {
     data
   })
 }
+export function fetchType(data) {
+  return request({
+    url: '/api/admin/contract/type/list',
+    method: 'post',
+    data
+  })
+}

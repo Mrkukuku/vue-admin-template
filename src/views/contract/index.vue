@@ -1,8 +1,11 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.uname" placeholder="经办人" style="width: 160px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-input v-model="listQuery.contractNum" placeholder="合同编号" style="width: 160px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.uname" placeholder="经办人" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.contractNum" placeholder="合同编号" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.projectName" placeholder="项目名称" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.firstPartyName" placeholder="甲方名称" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.secondPartyName" placeholder="乙方公司" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
        <el-select v-model="listQuery.status"  placeholder="合同状态" clearable style="width: 130px" class="filter-item">
                 <el-option v-for="item in statusOptions" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
@@ -49,30 +52,40 @@
       type="index"
       width="50">
     </el-table-column>
-      <el-table-column label="合同名称" prop="contractName"  align="center" width="200">
+      <el-table-column label="合同名称" prop="contractName"  align="center" width="160">
       </el-table-column>
-      <el-table-column label="合同编号" prop="contractNum"  align="center" width="200">
+      <el-table-column label="合同编号" prop="contractNum"  align="center" width="160">
       </el-table-column>
-      <el-table-column label="合同金额" prop="contractAmount"  align="center" width="140">
+      <el-table-column label="合同类别"   align="center" width="120">
+        <template slot-scope="{row}">
+           {{contractOptions[row.contractType-1].name}}
+        </template>
       </el-table-column>
-      <el-table-column label="开始日期"  align="center" width="130">
+      <el-table-column label="合同金额" prop="contractAmount"  align="center" width="120">
+      </el-table-column>
+       <el-table-column label="甲方名称" prop="firstPartyName"  align="center" width="140">
+      </el-table-column>
+      <el-table-column label="乙方名称" prop="secondPartyName"  align="center" width="140">
+      </el-table-column>
+      <el-table-column label="开始日期"  align="center" width="120">
         <template slot-scope="{row}">
             {{row.startTime|timeDate}}
         </template>
       </el-table-column>
-      <el-table-column label="结束日期" align="center" width="130">
+      <el-table-column label="结束日期" align="center" width="120">
         <template slot-scope="{row}">
              {{row.endTime|timeDate}}
         </template>
       </el-table-column>
       <el-table-column label="经办人" prop="uname"  align="center" width="110">
       </el-table-column>
-      <el-table-column label="合同状态"  align="center" width="110">
+     
+      <el-table-column label="合同状态"  align="center" width="100">
         <template slot-scope="{row}">
           {{statusOptions[row.status-1].name}}
         </template>
       </el-table-column>
-      <el-table-column label="派发状态"  align="center" width="110">
+      <el-table-column label="派发状态"  align="center" width="100">
         <template slot-scope="{row}">
           {{row.isDistribution==true&&'已派发'||row.isDistribution==false&&'未派发'||'' }}
         </template>
@@ -127,6 +140,11 @@
         </el-form-item>
          <el-form-item label="合同编号" prop="contractNum">
           <el-input v-model="temp.contractNum" />
+        </el-form-item>
+         <el-form-item label="合同类别" prop="contractType">
+           <el-select v-model="temp.contractType"  filterable  clearable style="width: 265px" class="filter-item">
+                <el-option v-for="item in contractOptions" :key="item.id" :label="item.name" :value="item.id"/>
+            </el-select>
         </el-form-item>
          <el-form-item label="合同金额" prop="contractAmount">
           <el-input v-model="temp.contractAmount" />
@@ -185,11 +203,11 @@
                 <el-button type="primary" slot="trigger">上传</el-button>
             </el-upload>
         </el-form-item>
-         <el-form-item label="合同原件"  v-else>
+         <!-- <el-form-item label="合同原件"  v-else>
                <div class="down" v-for="(item, index) in temp.fileUrls" :key="index" @click="download(item.fileUrl,item.name)">
                     {{item.name}} <i class="el-icon-download"></i>
               </div>
-        </el-form-item>
+        </el-form-item> -->
         </fieldset>
       </el-form>
       <div slot="footer" class="dialog-footer" v-if="!disabled">
@@ -256,7 +274,7 @@
 </template>
 
 <script>
-import { fetchList,addcontract,fetchDel,fetchIssue,fetchUser,addProgess,fetchTermination,fetchUnit } from '@/api/contract'
+import { fetchList,addcontract,fetchDel,fetchIssue,fetchUser,addProgess,fetchTermination,fetchUnit,fetchType } from '@/api/contract'
 import { Upload } from '@/api/upload'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -290,7 +308,10 @@ export default {
         endTime:'',
         startTime:'',
         status:'',
-        uname:''
+        uname:'',
+        projectName:'',
+        firstPartyName:'',
+        secondPartyName:'',
       },
       temp: {
         contractAmount :'',//(string, optional): 合同金额 ,
@@ -305,6 +326,7 @@ export default {
         startTime :'',//(string, optional): 合同开始时间
         contractDesc:'',//变更理由
         projectProgressDesc:[],//合同进展情况
+        contractType:'',
       },
       temp1:{
         departmentId:'',
@@ -323,6 +345,8 @@ export default {
         secondPartyName: [{ required: true, message: '请输入', trigger: 'blur' }],
         secondPartyName: [{ required: true, message: '请输入', trigger: 'blur' }],
         startTime: [{ required: true, message: '请输入', trigger: 'blur' }],
+        fileUrls: [{ required: true, message: '请上传', trigger: 'blur' }],
+        contractType: [{ required: true, message: '请选择', trigger: 'blur' }],
       },
       issueStatus:'',
       dialogStatus:'create',
@@ -371,6 +395,7 @@ export default {
           name:'转账'
         },
       ],
+    
       expireTimeOptionStart: {
           disabledDate: time => {
               let beginDateVal = this.temp.endTime;
@@ -413,22 +438,28 @@ export default {
         },
         projectProgressDesc:[],//进展情况
         id:'',//合同id
-        unitOptions:[]
+        unitOptions:[],//单位列表
+        contractOptions:[],//合同类型
     }
   },
   created() {
     this.getList()
-    fetchUnit({
+    this.getOptions()
+  },
+  methods: {
+    checkPermission,
+    getOptions(){
+      fetchUnit({
         pageNum: 1,
         pageSize: 1000,
         name:''
     }).then(res=>{
       this.unitOptions = res.list
     })
-  },
-  methods: {
-    checkPermission,
-    
+    fetchType({}).then( res=>{
+     this.contractOptions = res.data
+    })
+    },
     handleRecord(id){
       this.$router.push({name:'Contractchange',params:{id}})
     },
@@ -663,4 +694,5 @@ export default {
       margin-left: 5px;
     }
   }
+  
 </style>
