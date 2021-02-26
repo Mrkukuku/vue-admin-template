@@ -6,9 +6,12 @@
       <el-input v-model="listQuery.projectName" placeholder="项目名称" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.firstPartyName" placeholder="甲方名称" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.secondPartyName" placeholder="乙方公司" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter" />
-       <el-select v-model="listQuery.status"  placeholder="合同状态" clearable style="width: 130px" class="filter-item">
-                <el-option v-for="item in statusOptions" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
+      <el-select v-model="listQuery.status"  placeholder="合同状态" clearable style="width: 120px" class="filter-item">
+            <el-option v-for="item in statusOptions" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+      <el-select v-model="listQuery.contractType"  placeholder="合同类别"  filterable  clearable style="width: 120px" class="filter-item">
+            <el-option v-for="item in contractOptions" :key="item.id" :label="item.name" :value="item.id"/>
+      </el-select>
         <el-date-picker
         v-model="listQuery.startTime"
         type="date"
@@ -52,11 +55,13 @@
       type="index"
       width="50">
     </el-table-column>
-      <el-table-column label="合同名称" prop="contractName"  align="center" width="160">
+      <el-table-column label="项目名称" prop="projectName"  align="center" width="140">
       </el-table-column>
-      <el-table-column label="合同编号" prop="contractNum"  align="center" width="160">
+      <el-table-column label="合同名称" prop="contractName"  align="center" width="170">
       </el-table-column>
-      <el-table-column label="合同类别"   align="center" width="120">
+      <el-table-column label="合同编号" prop="contractNum"  align="center" width="140">
+      </el-table-column>
+      <el-table-column label="合同类别"   align="center" width="110">
         <template slot-scope="{row}">
            {{contractOptions[row.contractType-1].name}}
         </template>
@@ -90,7 +95,7 @@
           {{row.isDistribution==true&&'已派发'||row.isDistribution==false&&'未派发'||'' }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="left"  class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="left"  width="300" class-name="small-padding fixed-width">
         <template slot-scope="{row}" >
            <div v-if="checkPermission(['admin',2])">
             <el-button v-if="row.status!=2" type="primary" icon="el-icon-edit" size="mini" @click="handleUpdate(row)">
@@ -312,6 +317,7 @@ export default {
         projectName:'',
         firstPartyName:'',
         secondPartyName:'',
+        contractType:''
       },
       temp: {
         contractAmount :'',//(string, optional): 合同金额 ,
@@ -512,7 +518,7 @@ export default {
         }
     },
     handleIssued(id,type){//下发任务界面
-     Object.assign(this.$data.temp1,this.$options.data().temp1);
+      Object.assign(this.$data.temp1,this.$options.data().temp1);
       this.temp1.id = id
       this.userFormVisible = true
       if(type==0){
